@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Fatuus Server — Admin Dashboard</title>
+    <style>
+      body { font-family: system-ui, sans-serif; padding: 1rem; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ddd; padding: 8px; }
+      th { background: #f4f4f4; }
+      .actions { display:flex; gap:8px }
+    </style>
+  </head>
+  <body>
+    <h1>Fatuus Server — Admin Dashboard</h1>
+    <p>Simple demo dashboard. Manage users below.</p>
+
+    <section>
+      <h2>Create user</h2>
+      <form id="createForm">
+        <input name="name" placeholder="Name" required />
+        <input name="email" placeholder="Email" />
+        <button type="submit">Create</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Users</h2>
+      <table id="usersTable">
+        <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <script src="/admin/dashboard.js"></script>
+  </body>
+</html>

@@ -1,13 +1,9 @@
 import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
-import { registerExampleConnector } from './connectors/exampleConnector';
-```typescript
-import express from 'express';
-import http from 'http';
-import { WebSocketServer } from 'ws';
 import path from 'path';
 import { registerExampleConnector } from './connectors/exampleConnector';
+import { setUserOnline } from './services/userStore';
 import adminRouter from './routes/admin';
 
 const app = express();
@@ -23,10 +19,20 @@ app.post('/api/echo', (req, res) => res.json({ received: req.body }));
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
+// Track online status via an `identify` message from the client: { type: 'identify', userId }
 wss.on('connection', (ws) => {
+  let identifiedUserId: string | null = null;
+
   ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data.toString());
+      if (msg.type === 'identify' && typeof msg.userId === 'string') {
+        identifiedUserId = msg.userId;
+        setUserOnline(identifiedUserId as string, true);
+        ws.send(JSON.stringify({ type: 'identified', payload: { userId: identifiedUserId } }));
+        return;
+      }
+
       if (msg.type === 'hello') {
         ws.send(JSON.stringify({ type: 'welcome', payload: 'hello client' }));
       } else {
@@ -35,6 +41,10 @@ wss.on('connection', (ws) => {
     } catch (err) {
       ws.send(JSON.stringify({ type: 'error', payload: 'invalid json' }));
     }
+  });
+
+  ws.on('close', () => {
+    if (identifiedUserId) setUserOnline(identifiedUserId, false);
   });
 });
 
@@ -48,5 +58,3 @@ server.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Server listening on ${PORT}`);
 });
-
-```

@@ -5,7 +5,9 @@ const router = Router();
 
 // Serve a small JSON admin summary
 router.get('/api/admin/summary', (_req, res) => {
-  res.json({ users: listUsers().length });
+  // include online count
+  const users = listUsers();
+  res.json({ users: users.length, online: users.filter(u => u.online).length });
 });
 
 // Users CRUD (simple)
