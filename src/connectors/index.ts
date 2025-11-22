@@ -1,0 +1,1 @@
+export { registerExampleConnector } from './exampleConnector';
