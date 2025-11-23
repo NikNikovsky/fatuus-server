@@ -4,13 +4,19 @@ import { WebSocketServer } from 'ws';
 import path from 'path';
 import { registerExampleConnector } from './connectors/exampleConnector';
 import { setUserOnline } from './services/userStore';
+import { addSocketForUser, removeSocketForUser } from './ws/manager';
+import { handleIncoming } from './connectors/registry';
 import adminRouter from './routes/admin';
+import authRouter from './routes/auth';
+import messagesRouter from './routes/messages';
 
 const app = express();
 app.use(express.json());
 
 // Serve simple static dashboard under /admin
 app.use('/admin', express.static(path.join(__dirname, '..', 'public')));
+app.use(authRouter);
+app.use(messagesRouter);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
@@ -29,13 +35,18 @@ wss.on('connection', (ws) => {
       if (msg.type === 'identify' && typeof msg.userId === 'string') {
         identifiedUserId = msg.userId;
         setUserOnline(identifiedUserId as string, true);
+        addSocketForUser(identifiedUserId as string, ws);
         ws.send(JSON.stringify({ type: 'identified', payload: { userId: identifiedUserId } }));
         return;
       }
 
+      // route incoming messages to connector handlers
+      void handleIncoming(msg, { userId: identifiedUserId ?? undefined, ws });
+
       if (msg.type === 'hello') {
         ws.send(JSON.stringify({ type: 'welcome', payload: 'hello client' }));
       } else {
+        // default echo
         ws.send(JSON.stringify({ type: 'echo', payload: msg }));
       }
     } catch (err) {
@@ -44,7 +55,10 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    if (identifiedUserId) setUserOnline(identifiedUserId, false);
+    if (identifiedUserId) {
+      setUserOnline(identifiedUserId, false);
+      removeSocketForUser(identifiedUserId, ws);
+    }
   });
 });
 

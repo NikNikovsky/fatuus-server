@@ -23,7 +23,7 @@ Admin API: prefix /api/admin (users, summary)
 Connector adapters
 Place connector modules under `src/connectors` that export a registration function which receives an object with `{ app, wss, config }`.
 
-Next steps
+# Next steps
 - Adjust connector API to match your other project's connectors (read README of the other project)
 - Add more robust auth, validation, logging, and tests
 
@@ -38,5 +38,15 @@ npm run dev
 # open the dashboard in your browser:
 # http://localhost:4000/admin
 ```
+
+Persistent data
+- The server writes user data to the local `data/` folder (created next to the project). Users, passwords (hashed), files and preferences are stored in `data/users.json`.
+
+Authentication
+- Call `POST /api/auth/login` with JSON `{ "name": "<username-or-email>", "password": "<password>" }` and you'll get `{ token, userId }`.
+- Protect admin API calls by passing `Authorization: Bearer <token>` header.
+
+Notes:
+- Docker integration removed: this server is intended to run locally on your machine.
 # fatuus-server
 Server side repository for creating your own server for [Fatuus](https://github.com/NikNikovsky/fatuus).
