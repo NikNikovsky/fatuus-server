@@ -1,4 +1,5 @@
 # Fatuus Server (scaffold)
+[![AI Slop Inside](https://sladge.net/badge.svg)](https://sladge.net)
 
 This is a minimal Node + TypeScript server scaffold intended to host connector adapters for other projects.
 
